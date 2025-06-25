@@ -1,0 +1,36 @@
+{
+  "name": "node-starter",
+  "version": "1.0.0",
+  "description": "A modern Node.js starter template with TypeScript, Prisma, and database integration",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "tsc && node dist/index.js",
+    "dev": "tsc && nodemon dist/index.js",
+    "db:migrate": "prisma migrate dev --name",
+    "db:generate": "prisma generate",
+    "postinstall": "prisma generate"
+  },
+  "keywords": [
+    "nodejs",
+    "typescript",
+    "prisma",
+    "starter",
+    "template"
+  ],
+  "author": "",
+  "license": "MIT",
+  "packageManager": "pnpm@10.11.0",
+  "dependencies": {
+    "@prisma/client": "6.10.1",
+    "dotenv": "^16.5.0",
+    "nodemon": "^3.1.10",
+    "prisma": "^6.10.1",
+    "telegraf": "^4.16.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}

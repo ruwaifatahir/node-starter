@@ -5,8 +5,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "tsc && node dist/index.js",
-    "dev": "tsc && nodemon dist/index.js",
+    "dev": "nodemon",
+    "build": "tsc",
+    "start": "node dist/index.js",
     "db:migrate": "prisma migrate dev --name",
     "db:generate": "prisma generate",
     "postinstall": "prisma generate"

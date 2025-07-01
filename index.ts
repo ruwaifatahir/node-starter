@@ -1,25 +1,21 @@
 import "dotenv/config";
 
-import { Telegraf } from "telegraf";
-import { message } from "telegraf/filters";
-import { PrismaClient } from "@prisma/client";
+import cron from "node-cron";
 
-const prisma = new PrismaClient();
+import whaleAlert from "./src/main";
 
-async function main() {
-  const articles = await prisma.article.delete({
-    where: {
-      id: 2,
-    },
-  });
-}
+cron.schedule("*/5 * * * *", async () => {
+  try {
+    await whaleAlert();
+  } catch (err) {
+    console.error("Scheduled job error:", err);
+  }
+});
 
-main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
-    process.exit(1);
-  });
+(async () => {
+  try {
+    await whaleAlert();
+  } catch (err) {
+    console.error("Startup job error:", err);
+  }
+})();

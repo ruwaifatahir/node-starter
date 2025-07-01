@@ -8,19 +8,68 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model User {
-  id       Int       @id @default(autoincrement())
-  email    String    @unique
-  name     String?
-  telegramId Int?
-  articles Article[]
+model BotGroup {
+  id           String     @id
+  groupId      String     @unique
+  groupTitle   String?
+  addedBy      String
+  addedAt      DateTime   @default(now())
+  isActive     Boolean    @default(true)
+  minBuy       Float      @default(30)
+  emoji        String     @default("🟢")
+  mediaType    MediaType?
+  mediaUrl     String?
+  website      String?
+  telegram     String?
+  x            String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime
+  tokenAddress String?
 }
 
-model Article {
-  id          Int     @id @default(autoincrement())
-  title       String
-  body        String?
-  description String?
-  author      User    @relation(fields: [authorId], references: [id])
-  authorId    Int
+model BoostOrder {
+  id                     String        @id
+  telegramChatId         BigInt
+  tokenAddress           String
+  boostPackage           String
+  boostDurationHours     Int
+  price                  Float
+  paymentAddress         String        @unique
+  paymentPrivateKey      String
+  paymentStatus          PaymentStatus @default(PENDING)
+  boostStartedAt         DateTime?
+  boostEndsAt            DateTime?
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime
+  paymentTransactionHash String?
+  refundAddress          String?
+  refundTransactionHash  String?
+  emoji                  String?       @default("🐳")
+  userId                 String
+  website                String?
+  telegram               String?
+  x                      String?
+}
+
+model ProcessedAlert {
+  id           String   @id @default(uuid())
+  txHash       String
+  tokenAddress String
+  destination  String
+  createdAt    DateTime @default(now())
+
+  @@unique([txHash, tokenAddress, destination])
+}
+
+enum MediaType {
+  PHOTO
+  VIDEO
+  ANIMATION
+}
+
+enum PaymentStatus {
+  PENDING
+  CONFIRMED
+  EXPIRED
+  PROCESSING
 }

@@ -7,20 +7,3 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
-
-model User {
-  id       Int       @id @default(autoincrement())
-  email    String    @unique
-  name     String?
-  telegramId Int?
-  articles Article[]
-}
-
-model Article {
-  id          Int     @id @default(autoincrement())
-  title       String
-  body        String?
-  description String?
-  author      User    @relation(fields: [authorId], references: [id])
-  authorId    Int
-}

@@ -3,13 +3,15 @@
   "version": "1.0.0",
   "description": "A modern Node.js starter template with TypeScript, Prisma, and database integration",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "dev": "nodemon",
     "build": "tsc",
     "start": "node dist/index.js",
     "db:migrate": "prisma migrate dev --name",
     "db:generate": "prisma generate",
+    "db:studio": "prisma studio",
+    "db:push": "prisma db push",
+    "db:pull": "prisma db pull",
     "postinstall": "prisma generate"
   },
   "keywords": [

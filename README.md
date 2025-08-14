@@ -2,6 +2,57 @@
 
 A modern Node.js starter template with TypeScript, Prisma, and database integration for building scalable applications.
 
+## 🔌 Twitter API Routes (Quick Guide)
+
+- **Base URL**: `http://localhost:8080`
+- **Auth**: Optional `x-api-key` header (if `API_KEYS` is set)
+
+### 1) Post a tweet
+
+- **Method**: POST
+- **Path**: `/post-tweet`
+- **Body (JSON)**:
+  - `text` (string, required)
+  - `reply_to_tweet_id` (string, optional)
+- **Example**:
+
+```bash
+curl -X POST http://localhost:8080/post-tweet \
+  -H "Content-Type: application/json" \
+  -d '{"text":"Hello world!"}'
+```
+
+### 2) Get mentions
+
+- **Method**: GET
+- **Path**: `/get-mentions`
+- **Query**:
+  - `handle` (string, required; with or without `@`)
+  - `hours` (int, optional; 1–168, default 24)
+  - `count` (int, optional; 1–100, default 50)
+- **Example**:
+
+```bash
+curl "http://localhost:8080/get-mentions?handle=myhandle&hours=24&count=50"
+```
+
+### 3) Get conversation (thread to root)
+
+- **Method**: GET
+- **Path**: `/get-conversation/:tweetId`
+- **Query**:
+  - `handle` (string, required; with or without `@`)
+  - `scope` (string, optional; `relevant` | `full`, default `relevant`)
+  - `includeRoot` (bool, optional; default `true`)
+  - `contextBefore` (int, optional; 0–5, default `1`)
+- **Example**:
+
+```bash
+curl "http://localhost:8080/get-conversation/1871234567890?handle=myhandle&scope=relevant&includeRoot=true&contextBefore=1"
+```
+
+Responses are JSON with `success` and the requested data (`tweetId`, `conversationThread`, `mentions`, etc.).
+
 ## 🚀 Quick Start
 
 ### Prerequisites

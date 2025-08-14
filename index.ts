@@ -1,25 +1,32 @@
 import "dotenv/config";
+import express from "express";
+import { Scraper } from "agent-twitter-client";
+import { authenticateApiKey, getTwitterCookies } from "./utils";
+import { initTwitterScraper } from "./scrapper";
+import { postTweet } from "./controllers/post-tweet";
+import { getMentions } from "./controllers/get-mentions";
+import { getConversation } from "./controllers/get-conversation";
 
-import { Telegraf } from "telegraf";
-import { message } from "telegraf/filters";
-import { PrismaClient } from "@prisma/client";
+const app = express();
+const PORT = process.env.PORT || 8080;
+let twitterScraper: Scraper | null = null;
 
-const prisma = new PrismaClient();
+app.use(express.json());
 
-async function main() {
-  const articles = await prisma.article.delete({
-    where: {
-      id: 2,
-    },
+app.use("/", authenticateApiKey);
+
+const setUpRoutes = async () => {
+  app.post("/post-tweet", postTweet(twitterScraper!));
+  app.get("/get-mentions", getMentions(twitterScraper!));
+  app.get("/get-conversation/:tweetId", getConversation(twitterScraper!));
+};
+
+const startServer = async () => {
+  twitterScraper = await initTwitterScraper();
+  await setUpRoutes();
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
   });
-}
+};
 
-main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
-    process.exit(1);
-  });
+startServer();

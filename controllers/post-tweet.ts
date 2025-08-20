@@ -1,56 +1,75 @@
-  import { z } from "zod";
-  import { Request, Response } from "express";
-  import { Scraper } from "agent-twitter-client";
+import { z } from "zod";
+import { Request, Response } from "express";
+import { Scraper } from "agent-twitter-client";
 
-  const tweetSchema = z.object({
-    text: z.string().min(1, "Tweet text is required").max(280, "Tweet too long"),
-    reply_to_tweet_id: z.string().optional(),
-  });
+const tweetSchema = z.object({
+  text: z.string().min(0, "Tweet text is required").max(280, "Tweet too long"),
+  reply_to_tweet_id: z.string().optional(),
+  // Optional media array: base64 data + MIME type
+  media: z
+    .array(
+      z.object({
+        data: z.string().min(1), // base64 string
+        mediaType: z.string().min(1), // e.g. "image/jpeg", "image/png", "video/mp4"
+      })
+    )
+    .optional(),
+});
 
-  export const postTweet = (scraper: Scraper) => {
-    return async (req: Request, res: Response): Promise<void> => {
-      try {
-        const validatedData = tweetSchema.parse(req.body);
-        const { text, reply_to_tweet_id } = validatedData;
+export const postTweet = (scraper: Scraper) => {
+  return async (req: Request, res: Response): Promise<void> => {
+    try {
+      const validatedData = tweetSchema.parse(req.body);
+      const { text, reply_to_tweet_id, media } = validatedData;
 
-        const result = await scraper.sendTweet(text, reply_to_tweet_id);
-        if (result && typeof result.json === "function") {
-          const tweetData = await result.json();
+      const mediaData =
+        media?.map((m) => ({
+          data: Buffer.from(m.data, "base64"),
+          mediaType: m.mediaType,
+        })) ?? undefined;
 
-          const tweetId =
-            tweetData?.data?.create_tweet?.tweet_results?.result?.rest_id ||
-            tweetData?.data?.create_tweet?.tweet_results?.result?.legacy
-              ?.id_str ||
-            "unknown";
+      const result = await scraper.sendTweet(
+        text,
+        reply_to_tweet_id,
+        mediaData
+      );
+      if (result && typeof result.json === "function") {
+        const tweetData = await result.json();
 
-          res.status(201).json({
-            success: true,
-            tweetId: tweetId,
-            message: reply_to_tweet_id
-              ? "Reply posted successfully"
-              : "Tweet posted successfully",
-          });
-        } else {
-          res.status(500).json({
-            success: false,
-            message: "Something went wrong",
-          });
-        }
-      } catch (error: any) {
-        if (error instanceof z.ZodError) {
-          res.status(400).json({
-            success: false,
-            message: "Validation failed",
-            details: error.message,
-          });
-          return;
-        }
+        const tweetId =
+          tweetData?.data?.create_tweet?.tweet_results?.result?.rest_id ||
+          tweetData?.data?.create_tweet?.tweet_results?.result?.legacy
+            ?.id_str ||
+          "unknown";
 
-        console.error("Tweet posting error:", error.message);
+        res.status(201).json({
+          success: true,
+          tweetId: tweetId,
+          message: reply_to_tweet_id
+            ? "Reply posted successfully"
+            : "Tweet posted successfully",
+        });
+      } else {
         res.status(500).json({
-          error: "Failed to post tweet",
-          message: error.message,
+          success: false,
+          message: "Something went wrong",
         });
       }
-    };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({
+          success: false,
+          message: "Validation failed",
+          details: error.message,
+        });
+        return;
+      }
+
+      console.error("Tweet posting error:", error.message);
+      res.status(500).json({
+        error: "Failed to post tweet",
+        message: error.message,
+      });
+    }
   };
+};

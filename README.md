@@ -22,6 +22,24 @@ curl -X POST http://localhost:8080/post-tweet \
   -d '{"text":"Hello world!"}'
 ```
 
+#### Post a tweet with media (image)
+
+- Body (JSON): add `media` as an array of `{ mediaType, data }` where `data` is base64
+- Example:
+
+```bash
+IMG64=$(node -e "const fs=require('fs');process.stdout.write(fs.readFileSync('path/to/image.jpg').toString('base64'))")
+
+curl -X POST http://localhost:8080/post-tweet \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "Hello with image",
+    "media": [
+      { "mediaType": "image/jpeg", "data": "'"$IMG64"'" }
+    ]
+  }'
+```
+
 ### 2) Get mentions
 
 - **Method**: GET
